@@ -43,12 +43,18 @@ layout.mainCanvas.scroll = true
 
 layout.about:onPress(function()
     licenseDialog:hide()
+	aboutDialog.root.left=10
     aboutDialog:show()
 end)
 
 layout.license:onPress(function()
     aboutDialog:hide()
     licenseDialog:show()
+end)
+
+layout.test1:onPress(function()
+	local x,y,w,h=layout.root:getRectangle(true,true)
+	layout.leftSideBox.width=w/4
 end)
 
 aboutDialog.closeButton:onPress(function()
@@ -99,7 +105,8 @@ end)
 layout.fish:onChange(function()
     layout.fishStatus.text = 'Selected: ' .. layout.fish.selected.text
 end)
-
+layout.root.left=20
+print('left:',layout.root.left)
 -- show the main layout
 layout:show()
 

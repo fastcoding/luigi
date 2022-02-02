@@ -99,7 +99,7 @@ Backend.run = function ()
                 callback.wheelmoved(wheel.x, wheel.y)
             end
         end
-
+        
         sdl.renderSetClipRect(renderer, nil)
         sdl.setRenderDrawColor(renderer, 0, 0, 0, 255)
         sdl.renderClear(renderer)
@@ -168,9 +168,48 @@ Backend.drawRectangle = function (mode, x, y, w, h)
     end
 end
 
+
+Backend.drawLine = function (x1, y1, x2, y2)
+    sdl.renderDrawLine(renderer, x1,y1,x2,y2)
+end
+
+Backend.drawLines = function (pts)
+	if type(pts)~='table' or #pts==0 then return end
+	local sdlpts=ffi.new('SDL_Point['..#pts..']',pts)
+    sdl.renderDrawLines(renderer, sdlpts, #pts )
+end
+
+local function color2uint32(c)
+    return c[1]+((c[2]+c[3]*255)*255+c[4])*255
+end
+
+
+Backend.drawCircle = function (mode,x,y,r)
+	local c=lastColor or { 255, 255, 255, 255 }
+	c[4] = c[4] or 255
+	local uc=color2uint32(c)
+	if mode=='fill' then 
+			sdl.gfx.filledCircleColor(renderer,x,y,r,uc)
+	else
+			sdl.gfx.circleColor(renderer,x,y,r,uc)
+	end
+end
+
 local currentFont = Font()
 
 local lastColor
+
+Backend.drawRoundedRectangle = function (mode, x, y, w, h,r)
+	local c=lastColor or { 0, 0, 0, 255 }
+	c[4] = c[4] or 255
+	local uc=color2uint32(c)
+    x, y, w, h = math.floor(x), math.floor(y), math.floor(x+w), math.floor(y+h)
+    if mode == 'fill' then
+        sdl.gfx.roundedBoxColor(renderer, x, y, x+w, y+h,r,uc)
+    else
+        sdl.gfx.roundedRectangleColor(renderer, x, y, w, h , r, uc)
+    end
+end
 
 -- print( text, x, y, r, sx, sy, ox, oy, kx, ky )
 Backend.print = function (text, x, y)
@@ -220,6 +259,7 @@ local systemCursors = {
 Backend.getSystemCursor = function (name)
     return systemCursors[name] or systemCursors.arrow
 end
+Backend.isCursorSupported = function () return true end
 
 Backend.getWindowSize = function ()
     local x, y = IntOut(), IntOut()

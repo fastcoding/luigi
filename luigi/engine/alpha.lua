@@ -168,7 +168,7 @@ return function (config)
             padding = 2,
             background = backColor,
             color = textColor,
-            solid = true,
+            solid = true
         },
         progress = {
             type = { 'Control' },

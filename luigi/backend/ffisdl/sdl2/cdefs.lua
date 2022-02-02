@@ -2365,6 +2365,7 @@ void SDL_DestroyRenderer(SDL_Renderer * renderer);
 int SDL_GL_BindTexture(SDL_Texture *texture, float *texw, float *texh);
 int SDL_GL_UnbindTexture(SDL_Texture *texture);
 Uint32 SDL_GetTicks(void);
+Uint64 SDL_GetTicks64(void);  
 Uint64 SDL_GetPerformanceCounter(void);
 Uint64 SDL_GetPerformanceFrequency(void);
 void SDL_Delay(Uint32 ms);

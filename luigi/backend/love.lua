@@ -15,7 +15,7 @@ Backend.Cursor = love.mouse.newCursor
 
 Backend.Font = require(ROOT .. 'backend.love.font')
 
-Backend.Text = require(ROOT .. 'backend.love.text')
+Backend.Text = require(ROOT .. 'backend.love.text2')
 
 Backend.Image = love.graphics.newImage
 
@@ -33,6 +33,17 @@ end
 
 Backend.drawRectangle = love.graphics.rectangle
 
+Backend.drawLine = function (x1, y1, x2, y2)
+		love.graphics.line(x1,y1,x2,y2)
+end
+
+Backend.drawLines = function (pts)
+		if type(pts)~='table' or #pts==0 then
+			return 
+		end
+		love.graphics.line(pts)
+end
+
 Backend.print = love.graphics.print
 
 Backend.getClipboardText = love.system.getClipboardText
@@ -44,10 +55,41 @@ Backend.getMousePosition = love.mouse.getPosition
 Backend.setMousePosition = love.mouse.setPosition
 
 Backend.getSystemCursor = love.mouse.getSystemCursor
+Backend.isCursorSupported = love.mouse.isCursorSupported
 
-Backend.getWindowSize = function ()
+Backend.getWindowSize = function ()  
+    --local _,_,w,h=love.window.getSafeArea()
+    --return w,h
     return love.graphics.getWidth(), love.graphics.getHeight()
 end
+
+Backend.setWindowTitle= function(s)
+	return love.window.setTitle(s)
+end
+
+Backend.setWindowTop= function(t)  
+	local x,_, id=love.window.getPosition()
+	return love.window.setPosition(x,t,id)
+end
+Backend.setWindowLeft= function(l)
+	local _,y, id=love.window.getPosition()
+	return love.window.setPosition(l,y,id)
+end
+
+for _, n in ipairs({'Maxwidth','Maxheight','Minwidth','Minheight'}) do
+	Backend['setWindow'..n]= function (m)
+		love.window.showMessageBox('warning',n..' not supported on love2d','info')
+	end
+end
+function Backend.setWindowMaxheight (max)
+	love.window.showMessageBox('warning','maxheight not supported on love2d','info')
+end
+
+Backend.drawRoundedRectangle = function (mode, x, y, width, height,radius)
+	love.graphics.rectangle(mode,x,y,width,height,radius,radius)
+end
+
+Backend.drawCircle=love.graphics.circle
 
 Backend.getTime = love.timer.getTime
 
@@ -99,7 +141,7 @@ function Backend.hide (layout)
     end
     layout.hooks = {}
 end
-
+-- hook all [key] on love callbacks
 local function hook (layout, key, method, hookLast)
     layout.hooks[#layout.hooks + 1] = Hooker.hook(love, key, method, hookLast)
 end
@@ -130,23 +172,40 @@ else
     end
 end
 
+function Backend.setWindowIcon (icon)
+	love.window.setIcon(love.image.newImageData(icon))
+end
+
+function Backend.setWindowWidth(new_width)
+	local _,h,flags=love.window.getMode()
+	love.window.setMode(new_width,h,flags)
+end
+
+function Backend.setWindowHeight(new_height)
+	local w , _ ,flags=love.window.getMode()
+	love.window.setMode(w,new_height,flags)
+end
+
+
 function Backend.show (layout)
 
     local input = layout.input
 
-    hook(layout, 'draw', function ()
+    hook(layout, 'draw', function ()        
         input:handleDisplay(layout)
     end, true)
     hook(layout, 'resize', function (width, height)
         return input:handleReshape(layout, width, height)
     end)
     hook(layout, 'mousepressed', function (x, y, button)
+		--print('mouse pressed,',button)
         if button == 'wu' or button == 'wd' then
             return input:handleWheelMove(layout, 0, button == 'wu' and 1 or -1)
         end
         return input:handlePressStart(layout, getMouseButtonId(button), x, y)
     end)
     hook(layout, 'mousereleased', function (x, y, button)
+		--print('mouse released:',button)
         return input:handlePressEnd(layout, getMouseButtonId(button), x, y)
     end)
     hook(layout, 'mousemoved', function (x, y, dx, dy)
@@ -168,7 +227,23 @@ function Backend.show (layout)
         return input:handleTextInput(layout, text, Backend.getMousePosition())
     end)
     if (love._version_major == 0 and love._version_minor > 9) or love._version_major >= 11 then
+      	local touchid
+        hook(layout, 'touchpressed', function (id, x, y, dx, dy, pressure )
+			--print('touched pressed')
+			touchid=id
+        end)
+        hook(layout, 'touchreleased', function (id, x, y, dx, dy, pressure )
+			--print('touched released')
+			touchid=nil
+        end)
+        hook(layout, 'touchmoved', function (id, x, y, dx, dy, pressure )
+			if id==touchid then 
+				--print('touchmoved',dx,dy)
+            	return input:handleWheelMove(layout, dx, dy)
+			end
+        end)
         hook(layout, 'wheelmoved', function (x, y)
+			--print('wheelmoved',x, y)
             return input:handleWheelMove(layout, x, y)
         end)
     end

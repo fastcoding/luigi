@@ -47,10 +47,14 @@ function Painter:paintOutline ()
     local widget = self.widget
     if not widget.outline then return end
     local x, y, w, h = widget:getRectangle(true)
-
+	
     Backend.push()
     Backend.setColor(widget.outline)
-    Backend.drawRectangle('line', x + 0.5, y + 0.5, w, h)
+	if widget.radius and widget.radius>1 then
+		Backend.drawRoundedRectangle('line',x+0.5,y+0.5,w,h,widget.radius)
+	else
+    	Backend.drawRectangle('line', x + 0.5, y + 0.5, w, h)
+	end
     Backend.pop()
 end
 

@@ -20,6 +20,8 @@ local Attribute = {}
 local function cascade (widget, attribute)
     local value = rawget(widget, 'attributes')[attribute]
     if value ~= nil then return value end
+	local value=widget.layout:getStyle():getProperty(widget,attribute)
+    if value ~=nil then return value end		
     local parent = rawget(widget, 'parent')
     return parent and parent[attribute]
 end
@@ -597,6 +599,14 @@ function Attribute.icon.set (widget, value)
     widget.attributes.icon = value
     widget.textData = nil
 end
+
+Attribute.radius = {}
+
+function Attribute.radius.set (widget, value)
+    widget.attributes.radius = value
+end
+
+
 
 
 return Attribute

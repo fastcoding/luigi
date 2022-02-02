@@ -78,6 +78,11 @@ function Layout:createWidget (data)
     return Widget(self, data)
 end
 
+function Layout:replaceWidget(index,data)
+  assert( #self>=index ,'invalid widget index')
+  self[index]=Widget(self,data)
+end
+
 local function clearWidget (widget)
     widget.textData = nil
     widget.fontData = nil

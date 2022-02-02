@@ -183,6 +183,10 @@ local function metaNewIndex (self, property, value)
     end
 end
 
+local _widgetMeta={ __index = metaIndex, __newindex = metaNewIndex }
+
+function Widget.isInstance(v) return getmetatable(v)==_widgetMeta end
+
 local attributeNames = {}
 
 for name in pairs(Attribute) do
@@ -220,16 +224,16 @@ local function metaCall (Widget, layout, self)
     self.pressed = {}
     self.painter = Painter(self)
 
-    setmetatable(self, { __index = metaIndex, __newindex = metaNewIndex })
+    setmetatable(self, _widgetMeta)
 
     for _, property in ipairs(attributeNames) do
         local value = rawget(self, property)
         rawset(self, property, nil)
         self[property] = value
     end
-
+	-- children in ipairs
     for k, v in ipairs(self) do
-        self[k] = v.isWidget and v or metaCall(Widget, self.layout, v)
+        self[k] = Widget.isInstance(v) and v or metaCall(Widget, self.layout, v)
         self[k].parent = self
     end
 

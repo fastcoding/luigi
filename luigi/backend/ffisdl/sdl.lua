@@ -63,4 +63,7 @@ if sdl.init(sdl.INIT_VIDEO) ~= 0 then
     error(ffi.string(sdl.getError()))
 end
 
+local sdl_gfx = require(REL .. 'sdl2_gfx.init' )
+sdl.gfx = sdl_gfx
+
 return sdl

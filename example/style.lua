@@ -18,6 +18,10 @@ return {
             return false -- no slices
         end
     },
+	grayHLine = {
+		height = 1,
+		background={128,128,128,64}
+	},
     statusbar = {
         align = 'left middle',
     },

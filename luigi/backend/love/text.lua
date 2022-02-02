@@ -8,9 +8,24 @@ local Text = setmetatable({}, { __call = function (self, ...)
     return object, self.constructor(object, ...)
 end })
 
+local function fixcolor(color)
+	if not color then 
+		return (_G.love._version_major>=11 and { 0, 0, 0} or {0,0,0})
+	end
+	local clr={unpack(color)} 
+	if clr[1]>1 or clr[2]>1 or clr[3]>1 then
+		if _G.love._version_major >= 11 then
+			for i=1,3 do 
+					clr[i]=clr[i]/255 
+			end
+		end
+	end
+	return clr
+end
+
 local function renderSingle (self, x, y, font, text, color)
     love.graphics.push('all')
-    love.graphics.setColor(color or { 0, 0, 0 })
+    love.graphics.setColor(fixcolor(color))
     love.graphics.setFont(font.loveFont)
     love.graphics.print(text, math.floor(x), math.floor(y))
     love.graphics.pop()
@@ -25,7 +40,7 @@ local function renderMulti (self, x, y, font, text, color, align, limit)
     local height = #lines * lineHeight
 
     love.graphics.push('all')
-    love.graphics.setColor(color or { 0, 0, 0 })
+    love.graphics.setColor(fixcolor(color))
     love.graphics.setFont(font.loveFont)
 
     for index, line in ipairs(lines) do
@@ -53,6 +68,7 @@ end
 
 function Text:constructor (font, text, color, align, limit)
     if limit then
+
         function self:draw (x, y)
             return renderMulti(self, x, y, font, text, color, align, limit)
         end

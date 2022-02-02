@@ -14,10 +14,10 @@ function Input:constructor ()
     self.passedWidgets = setmetatable({}, weakValueMeta)
 end
 
-function Input:handleDisplay (layout)
+function Input:handleDisplay (layout,...)
     local root = layout.root
     if root then root:paint() end
-    Event.Display:emit(layout)
+    Event.Display:emit(layout,{...})
 end
 
 function Input:handleKeyPress (layout, key, sc, x, y)
@@ -55,8 +55,10 @@ function Input:handleTextInput (layout, text, x, y)
 end
 
 local function checkHit (widget, layout)
-    local root = layout.root
-    return widget and widget.solid or root.modal, widget or root
+    local root = layout.root  
+	--HX: only when solid or modal, it returns hit!?
+    --return widget and widget.solid or root.modal, widget or root
+    return widget, widget or root
 end
 
 function Input:handleMove (layout, x, y)
@@ -90,7 +92,7 @@ function Input:handleMove (layout, x, y)
             oldTarget = previousWidget,
             x = x, y = y
         })
-        if widget.cursor then
+        if widget.cursor and Backend.isCursorSupported() then
             Backend.setCursor(Backend.getSystemCursor(widget.cursor))
         else
             Backend.setCursor()
@@ -165,7 +167,9 @@ end
 
 function Input:handlePressEnd (layout, button, x, y, widget, shortcut)
     local originWidget = widget or self.pressedWidgets[button]
-    if not originWidget then return end
+    if not originWidget then
+			return 
+	end
     local hit, widget = checkHit(widget or layout:getWidgetAt(x, y), layout)
     local wasPressed = originWidget.pressed[button]
     if hit then
