@@ -35,17 +35,23 @@ end
 function Text:constructor (font, text, color, align, limit)
 	self.textObj=love.graphics.newText(font.loveFont)
 	self.text=text
+  local tbl
   if type(text)=='string' then 
-		text={text} 
+		tbl={fixcolor(color),text} 
   elseif type(text)=='table' then
     if type(text[1])=='table' then 
-       text={'',unpack(text)}
+       --text={unpack(text)}  
+       -- 1st one is color
+       tbl=text
+    else
+      --the first one is string
+      tbl={fixcolor(color),unpack(text)}
     end
 	end
 	if limit then 
-		self.textObj:addf({fixcolor(color),unpack(text)},limit,align,0,0)
+		self.textObj:addf(tbl,limit,align,0,0)
 	else
-		self.textObj:add({fixcolor(color),unpack(text)},0,0)
+		self.textObj:add(tbl,0,0)
 	end
 end
 
